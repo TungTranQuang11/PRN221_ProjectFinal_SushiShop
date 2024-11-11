@@ -1,0 +1,454 @@
+﻿@model PaginatedList<ProjectFinal.Models.Product>
+
+@{
+    ViewData["Title"] = "Manage Products";
+    var categories = ViewBag.Categories as List<Category>;
+    var products = ViewBag.Products as List<Product>;
+}
+
+
+<!--====== Start Page Section ======-->
+<section class="page-banner">
+    <div class="page-bg-wrapper p-r z-1 bg_cover pt-100 pb-110" style="background-image: url(/assets/images/bg/page-bg.jpg);">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <!--=== Page Banner Content ===-->
+                    <div class="page-banner-content text-center">
+                        <h1 class="page-title">Manage Products</h1>
+                        <ul class="breadcrumb-link">
+                            <li><a href="index.html">Home</a></li>
+                            <li class="active">Manage Products</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section><!--====== End Page Section ======-->
+<!--====== Start Menu Page Section ======-->
+<section class="menu-grid-section gray-bg pt-80 pb-130">
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-lg-12">
+                <form class="d-flex" method="get" action="@Url.Action("ManageProducts", "Admin")" onsubmit="return validateSearchInput()">
+                    <input class="form-control me-2" type="search" id="searchQuery" name="searchQuery"
+                           placeholder="Search by name" aria-label="Search"
+                           value="@Html.Raw(ViewBag.CurrentSearch ?? string.Empty)">
+                    <button class="btn btn-outline-success" type="submit">Search</button>
+                </form>
+            </div>
+        </div>
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <div class="text-box text-center text-md-start mb-30 wow fadeInLeft">
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addProductModal">
+                        Add New Product
+                    </button>
+                </div>
+            </div>
+
+            <!-- Add New Product Modal -->
+            <div class="modal fade" id="addProductModal" tabindex="-1" aria-labelledby="addProductModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="addProductModalLabel">Add New Product</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form method="post" action="@Url.Action("AddProduct", "Admin")" enctype="multipart/form-data" onsubmit="return validateForm()">
+                                <input type="hidden" name="pageNumber" value="@Model.PageIndex" />
+                                <div class="mb-3">
+                                    <label for="productName" class="form-label">Product Name</label>
+                                    <input type="text" class="form-control" id="productName" name="productName" required>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="description" class="form-label">Description</label>
+                                    <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="price" class="form-label">Price</label>
+                                    <input type="number" step="0.01" class="form-control" id="price" name="price" required>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="quantityInStock" class="form-label">Quantity In Stock</label>
+                                    <input type="number" class="form-control" id="quantityInStock" name="quantityInStock" required>
+                                </div>
+
+                                <div class="mb-3 row align-items-center">
+                                    <label for="category" class="col-form-label col-auto">Category</label>
+                                    <div class="col">
+                                        <select id="category" name="categoryId" required>
+                                            @foreach (var category in categories)
+                                            {
+                                                <option value="@category.CategoryId">@category.CategoryName</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="uploadImage" class="form-label">Upload Image File</label>
+                                    <input type="file" class="form-control" id="uploadImage" name="ImageFile">
+                                </div>
+
+                                <div class="mb-3 form-check d-flex align-items-center">
+                                    <input type="checkbox" class="form-check-input me-2" id="status" name="status" value="true">
+                                    <label class="form-check-label" for="status">Hidden Product</label>
+                                </div>
+
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    <button type="submit" class="btn btn-primary">Add Product</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="filter-category mb-30 float-md-end wow fadeInRight">
+                    <select class="wide" id="categorySelect" onchange="filterByCategory()">
+                        <option data-display="All Categories" value="">All Categories</option>
+                        @foreach (var category in categories)
+                        {
+                            if (ViewBag.CurrentCategory != null && ViewBag.CurrentCategory.ToString() == category.CategoryId.ToString())
+                            {
+                                <option value="@category.CategoryId" selected>
+                                    @category.CategoryName
+                                </option>
+                            }
+                            else
+                            {
+                                <option value="@category.CategoryId">
+                                    @category.CategoryName
+                                </option>
+                            }
+                        }
+                    </select>
+                </div>
+            </div>
+
+
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <table class="table table-striped table-bordered">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Product ID</th>
+                            <th>Product Name</th>
+                            <th>Image</th>
+                            <th>Category</th>
+                            <th>Price</th>
+                            <th>Stock</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var product in Model)
+                        {
+                            <tr>
+                                <td>@product.ProductId</td>
+                                <td>
+                                    @product.ProductName
+                                </td>
+                                <td>
+                                    <img src="/assets/images/product/@product.Image" alt="@product.ProductName" class="img-fluid img-thumbnail me-2" style="max-width: 75px; height: auto;" />
+                                </td>
+                                <td>@product.Category?.CategoryName</td>
+                                <td>@product.Price</td>
+                                <td>@product.QuantityInStock</td>
+                                <td>@(product.Status == true ? "Inactive" : "Active")</td>
+                                <td>
+                                    <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editModal-@product.ProductId">
+                                        Edit
+                                    </button>
+                                    <div class="modal fade" id="editModal-@product.ProductId" tabindex="-1" aria-labelledby="editModalLabel-@product.ProductId" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="editModalLabel-@product.ProductId">Edit Product</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <form method="post" action="@Url.Action("EditProduct", "Admin")" enctype="multipart/form-data" onsubmit="return validateForm()">
+                                                        <input type="hidden" name="productId" value="@product.ProductId" />
+                                                        <input type="hidden" name="pageNumber" value="@Model.PageIndex" />
+
+                                                        <div class="mb-3">
+                                                            <label for="productName-@product.ProductId" class="form-label">Product Name</label>
+                                                            <input type="text" class="form-control" id="productName-@product.ProductId" name="productName" value="@product.ProductName" required>
+                                                        </div>
+
+                                                        <div class="mb-3">
+                                                            <label for="description-@product.ProductId" class="form-label">Description</label>
+                                                            <textarea class="form-control" id="description-@product.ProductId" name="description" rows="3" required>@product.Description</textarea>
+                                                        </div>
+
+                                                        <div class="mb-3">
+                                                            <label for="price-@product.ProductId" class="form-label">Price</label>
+                                                            <input type="number" step="0.01" class="form-control" id="price-@product.ProductId" name="price" value="@product.Price" min="0" required>
+                                                        </div>
+
+                                                        <div class="mb-3">
+                                                            <label for="quantityInStock-@product.ProductId" class="form-label">Quantity In Stock</label>
+                                                            <input type="number" class="form-control" id="quantityInStock-@product.ProductId" name="quantityInStock" value="@product.QuantityInStock" min="0" required>
+                                                        </div>
+
+                                                        <div class="mb-3 row align-items-center">
+                                                            <label for="category-@product.ProductId" class="col-form-label col-auto">Category</label>
+                                                            <div class="col">
+                                                                <select id="category-@product.ProductId" name="categoryId">
+                                                                    @foreach (var category in categories)
+                                                                    {
+                                                                        if (product.CategoryId == category.CategoryId)
+                                                                        {
+                                                                            <option value="@category.CategoryId" selected>@category.CategoryName</option>
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            <option value="@category.CategoryId">@category.CategoryName</option>
+                                                                        }
+                                                                    }
+                                                                </select>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="mb-3">
+                                                            <label for="image-@product.ProductId" class="form-label">Image URL</label>
+                                                            <input type="text" class="form-control" id="image-@product.ProductId" name="image" value="@product.Image" readonly>
+                                                        </div>
+
+                                                        <div class="mb-3">
+                                                            <label for="uploadImage-@product.ProductId" class="form-label">Upload New Image</label>
+                                                            <input type="file" class="form-control" id="uploadImage-@product.ProductId" name="ImageFile">
+                                                        </div>
+
+                                                        <div class="mb-3 form-check d-flex align-items-center">
+                                                            <input type="checkbox" class="form-check-input me-2" id="status-@product.ProductId" name="status" value="true" @(product.Status == true ? "checked" : "")>
+                                                            <label class="form-check-label" for="status-@product.ProductId">Hidden Product</label>
+                                                        </div>
+
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                            <button type="submit" class="btn btn-primary">Save changes</button>
+                                                        </div>
+                                                    </form>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal-@product.ProductId">Delete</button>
+                                    <div class="modal fade" id="confirmDeleteModal-@product.ProductId" tabindex="-1" aria-labelledby="confirmDeleteModalLabel-@product.ProductId" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="confirmDeleteModalLabel-@product.ProductId">Confirm Delete</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    Are you sure you want to delete this item: <strong>@product.ProductName</strong>?
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                    <form action="@Url.Action("DeleteProduct", "Admin")" method="post" style="display:inline;">
+                                                        <input type="hidden" name="id" value="@product.ProductId" />
+                                                        <input type="hidden" name="pageNumber" value="@Model.PageIndex" />
+                                                        <button type="submit" class="btn btn-danger">Delete</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="pagination-container">
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination justify-content-center">
+                            @if (Model.HasPreviousPage)
+                            {
+                                <li class="page-item">
+                                    <a class="page-link" href="@Url.Action("ManageProducts", new { pageNumber = Model.PageIndex - 1, categoryId = ViewBag.CurrentCategory, searchQuery = ViewBag.CurrentSearch })" aria-label="Previous">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </a>
+                                </li>
+                            }
+
+                            <li class="page-item @(Model.PageIndex == 1 ? "active" : "")">
+                                <a class="page-link" href="@Url.Action("ManageProducts", new { pageNumber = 1, categoryId = ViewBag.CurrentCategory, searchQuery = ViewBag.CurrentSearch })">1</a>
+                            </li>
+
+                            @if (Model.PageIndex > 3)
+                            {
+                                <li class="page-item disabled"><span class="page-link">...</span></li>
+                            }
+
+                            @for (int i = Math.Max(2, Model.PageIndex - 1); i <= Math.Min(Model.TotalPages - 1, Model.PageIndex + 1); i++)
+                            {
+                                <li class="page-item @(Model.PageIndex == i ? "active" : "")">
+                                    <a class="page-link" href="@Url.Action("ManageProducts", new { pageNumber = i, categoryId = ViewBag.CurrentCategory, searchQuery = ViewBag.CurrentSearch })">@i</a>
+                                </li>
+                            }
+
+                            @if (Model.PageIndex < Model.TotalPages - 2)
+                            {
+                                <li class="page-item disabled"><span class="page-link">...</span></li>
+                            }
+
+                            @if (Model.TotalPages > 1)
+                            {
+                                <li class="page-item @(Model.PageIndex == Model.TotalPages ? "active" : "")">
+                                    <a class="page-link" href="@Url.Action("ManageProducts", new { pageNumber = Model.TotalPages, categoryId = ViewBag.CurrentCategory, searchQuery = ViewBag.CurrentSearch })">@Model.TotalPages</a>
+                                </li>
+                            }
+
+                            @if (Model.HasNextPage)
+                            {
+                                <li class="page-item">
+                                    <a class="page-link" href="@Url.Action("ManageProducts", new { pageNumber = Model.PageIndex + 1, categoryId = ViewBag.CurrentCategory, searchQuery = ViewBag.CurrentSearch })" aria-label="Next">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.2/signalr.min.js"></script>
+    <script>
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/signalrServer")
+            .build();
+
+        connection.start().catch(function (err) {
+            return console.error(err.toString());
+        });
+
+        function validateForm() {
+            const price = parseFloat(document.getElementById("price").value);
+            const quantityInStock = parseInt(document.getElementById("quantityInStock").value, 10);
+
+            if (price < 0) {
+                alert("Price must be greater than or equal to 0.");
+                return false;
+            }
+
+            if (quantityInStock < 0) {
+                alert("Quantity In Stock must be greater than or equal to 0.");
+                return false;
+            }
+
+            return true;
+        }
+
+        function validateSearchInput() {
+            const searchInput = document.getElementById("searchQuery").value.trim();
+            if (searchInput === "") {
+                window.location.href = "@Url.Action("ManageProducts", "Admin")";
+                return false;
+            }
+            return true;
+        }
+
+        function filterByCategory() {
+            const categorySelect = document.getElementById("categorySelect");
+            const selectedValue = categorySelect.value;
+            const searchQuery = document.getElementById("searchQuery").value.trim();
+
+            const currentPage = 1;
+
+            let url = '@Url.Action("ManageProducts", "Admin")';
+            const params = [];
+
+            if (selectedValue) {
+                params.push(`categoryId=${encodeURIComponent(selectedValue)}`);
+            }
+
+            if (searchQuery) {
+                params.push(`searchQuery=${encodeURIComponent(searchQuery)}`);
+            }
+
+            params.push(`pageNumber=${currentPage}`);
+
+            if (params.length > 0) {
+                url += `?${params.join('&')}`;
+            }
+
+            window.location.href = url;
+        }
+
+        connection.on("ProductAdded", function (newProduct) {
+            const tableBody = document.querySelector("tbody");
+            const newRow = `
+                 <tr>
+                    <td>${newProduct.productId}</td>
+                    <td>${newProduct.productName}</td>
+                    <td>
+                        <img src="/assets/images/product/${newProduct.image}" alt="${newProduct.productName}" class="img-fluid img-thumbnail me-2" style="max-width: 75px; height: auto;" />
+                    </td>
+                    <td>${newProduct.categoryName}</td>
+                    <td>${newProduct.price}</td>
+                    <td>${newProduct.quantityInStock}</td>
+                    <td>${newProduct.status ? 'Inactive' : 'Active'}</td>
+                    <td>
+                       <span class="order-status text-primary fw-bold">Pending</span>
+                    </td>
+                </tr>
+                    `;
+            tableBody.insertAdjacentHTML('beforeend', newRow);
+        });
+
+        connection.on("ProductUpdated", function (updatedProduct) {
+            console.log(updatedProduct);
+            const rows = document.querySelectorAll("tbody tr");
+            rows.forEach(row => {
+                if (row.cells[0].textContent == updatedProduct.productId) {
+                    row.cells[1].textContent = updatedProduct.productName;
+                    row.cells[2].innerHTML = `
+                        <img src="/assets/images/product/${updatedProduct.image}" alt="${updatedProduct.productName}" class="img-fluid img-thumbnail me-2" style="max-width: 75px; height: auto;" />
+                    `;
+                    row.cells[3].textContent = updatedProduct.categoryName; 
+                    row.cells[4].textContent = updatedProduct.price;
+                    row.cells[5].textContent = updatedProduct.quantityInStock;
+                    row.cells[6].textContent = updatedProduct.status ? 'Inactive' : 'Active';
+                }
+
+                document.getElementById(`productName-${updatedProduct.productId}`).value = updatedProduct.productName;
+                document.getElementById(`description-${updatedProduct.productId}`).value = updatedProduct.description;
+                document.getElementById(`price-${updatedProduct.productId}`).value = updatedProduct.price;
+                document.getElementById(`quantityInStock-${updatedProduct.productId}`).value = updatedProduct.quantityInStock;
+                document.getElementById(`category-${updatedProduct.productId}`).value = updatedProduct.categoryId; 
+                document.getElementById(`image-${updatedProduct.productId}`).value = updatedProduct.image;
+                document.getElementById(`status-${updatedProduct.productId}`).checked = updatedProduct.status;
+            });
+        });
+
+        connection.on("ProductDeleted", function (productId) {
+            const rows = document.querySelectorAll("tbody tr");
+            rows.forEach(row => {
+                if (row.cells[0].textContent == productId) {
+                    row.remove();
+                }
+            });
+        });
+
+    </script>
+}

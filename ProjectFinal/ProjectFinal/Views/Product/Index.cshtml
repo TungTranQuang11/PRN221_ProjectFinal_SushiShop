@@ -1,0 +1,324 @@
+﻿@model PaginatedList<Product>
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@{
+    ViewData["Title"] = "Product";
+    int totalCount = Model.TotalCount;
+    int pageIndex = Model.PageIndex;
+    int pageSize = Model.TotalPages;
+}
+
+<!--====== Start Page Section ======-->
+<section class="page-banner">
+    <div class="page-bg-wrapper p-r z-1 bg_cover pt-150 pb-110" style="background-image: url(assets/images/bg/page-bg.jpg);">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <!--=== Page Banner Content ===-->
+                    <div class="page-banner-content text-center">
+                        <h1 class="page-title">Our Products</h1>
+                        <ul class="breadcrumb-link">
+                            <li><a href="@Url.Action("Index", "Home")">Home</a></li>
+                            <li class="active">Products</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!--====== End Page Section ======-->
+<!--====== Start Menu Page Section ======-->
+<section class="menu-grid-section gray-bg pt-130 pb-130">
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-lg-12">
+                <form class="d-flex" method="get" action="@Url.Action("Index", "Product")" onsubmit="return validateSearchInput()">
+                    <input class="form-control me-2" type="search" id="searchQuery" name="searchQuery" placeholder="Search by name" aria-label="Search" value="@ViewBag.CurrentFilter" required>
+                    <button class="btn btn-outline-success" type="submit">Search</button>
+                </form>
+            </div>
+        </div>
+        <div class="row align-items-center">
+            <div class="col-md-6 d-flex justify-content-center justify-content-md-start">
+                <div class="text-box text-center text-md-start mb-30 wow fadeInLeft">
+                    <p>
+                        Showing @pageIndex - @pageSize of @totalCount Results
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-6 d-flex justify-content-center justify-content-md-end">
+                <div class="d-flex">
+                    <div class="filter-category mb-30 me-3 wow fadeInRight">
+                        <select class="wide" id="sortOptions" onchange="sortProducts()">
+                            <option data-display="Sort by Newness" value="SortByNewness"
+                                    selected="@(ViewBag.SortOrder == null || ViewBag.SortOrder == "SortByNewness")">Sort by Newness</option>
+                            <option value="PriceHighToLow" data-display="Price High To Low"
+                                    selected="@(ViewBag.SortOrder == "PriceHighToLow")">Price High To Low</option>
+                            <option value="PriceLowToHigh" data-display="Price Low To High"
+                                    selected="@(ViewBag.SortOrder == "PriceLowToHigh")">Price Low To High</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-category mb-30 wow fadeInRight">
+                        <select id="categoryOptions" class="wide" onchange="filterByCategory()">
+                            <option data-display="All Categories" value="" selected="@(ViewBag.CurrentCategory == null ? "selected" : "")">All Categories</option>
+                            @foreach (var category in ViewBag.Categories)
+                            {
+                                <option value="@category.CategoryId" data-display="@category.CategoryName" selected="@(ViewBag.CurrentCategory != null && ViewBag.CurrentCategory == category.CategoryId)">
+                                    @category.CategoryName
+                                </option>
+                            }
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            @if (Model != null && Model.Any())
+            {
+                @foreach (var product in Model)
+                {
+                    <div class="col-lg-4 col-md-6">
+                        <div class="menu-item style-four mb-30 wow fadeInUp">
+                            <div class="menu-thumbnail">
+                                <img src="assets/images/product/@product.Image" alt="Image" style="height: 277px">
+                            </div>
+                            <div class="menu-info">
+                                <div class="menu-meta">
+                                    <span class="price"><span class="currency">$</span>@product.Price</span>
+                                    <span class="rating">
+                                        <i class="fas fa-star"></i>
+                                        <a href="#">4.7(375)</a>
+                                    </span>
+                                </div>
+                                <h4 class="title">
+                                    <a href="@Url.Action("ProductDetail", "Home", new { id = product.ProductId })">@product.ProductName</a>
+                                </h4>
+                                <ul class="check-list style-one">
+                                    <li>@product.Description</li>
+                                </ul>
+                                @if (product.QuantityInStock > 0)
+                                {
+                                    <a href="#" class="theme-btn style-two add-to-cart" data-productid="@product.ProductId">
+                                        <i class="far fa-cart-plus"></i> Add to Cart
+                                    </a>
+                                } else
+                                {
+                                    <span class="text-danger theme-btn style-two">Temporarily Unavailable</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="alert alert-info text-center" role="alert">
+                    No products found. <a href="@Url.Action("Index", "Product")" class="alert-link">Back to menu</a>
+                </div>
+            }
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center mt-20">
+                        @if (Model.HasPreviousPage)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" href="@Url.Action("Index", new { pageIndex = Model.PageIndex - 1, sortOrder = ViewBag.SortOrder, searchQuery = ViewBag.CurrentFilter, categoryId = ViewBag.CurrentCategory })" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="page-item disabled">
+                                <span class="page-link" aria-hidden="true">&laquo;</span>
+                            </li>
+                        }
+
+                        @{
+                            int startPage = Model.PageIndex - 2;
+                            int endPage = Model.PageIndex + 2;
+
+                            if (startPage < 1)
+                            {
+                                endPage += (1 - startPage);
+                                startPage = 1;
+                            }
+
+                            if (endPage > Model.TotalPages)
+                            {
+                                startPage -= (endPage - Model.TotalPages);
+                                endPage = Model.TotalPages;
+                            }
+
+                            if (startPage < 1)
+                            {
+                                startPage = 1;
+                            }
+                        }
+
+                        @if (startPage > 1)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" href="@Url.Action("Index", new { pageIndex = 1, sortOrder = ViewBag.SortOrder, searchQuery = ViewBag.CurrentFilter, categoryId = ViewBag.CurrentCategory })">1</a>
+                            </li>
+                            @if (startPage > 2)
+                            {
+                                <li class="page-item disabled"><span class="page-link">...</span></li>
+                            }
+                        }
+
+                        @for (int i = startPage; i <= endPage; i++)
+                        {
+                            if (i == Model.PageIndex)
+                            {
+                                <li class="page-item active" aria-current="page">
+                                    <span class="page-link">@i</span>
+                                </li>
+                            }
+                            else
+                            {
+                                <li class="page-item">
+                                    <a class="page-link" href="@Url.Action("Index", new { pageIndex = i, sortOrder = ViewBag.SortOrder, searchQuery = ViewBag.CurrentFilter, categoryId = ViewBag.CurrentCategory })">@i</a>
+                                </li>
+                            }
+                        }
+
+                        @if (endPage < Model.TotalPages)
+                        {
+                            @if (endPage < Model.TotalPages - 1)
+                            {
+                                <li class="page-item disabled"><span class="page-link">...</span></li>
+                            }
+                            <li class="page-item">
+                                <a class="page-link" href="@Url.Action("Index", new { pageIndex = Model.TotalPages, sortOrder = ViewBag.SortOrder, searchQuery = ViewBag.CurrentFilter, categoryId = ViewBag.CurrentCategory })">@Model.TotalPages</a>
+                            </li>
+                        }
+
+                        <!-- Next Page Link -->
+                        @if (Model.HasNextPage)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" href="@Url.Action("Index", new { pageIndex = Model.PageIndex + 1, sortOrder = ViewBag.SortOrder, searchQuery = ViewBag.CurrentFilter, categoryId = ViewBag.CurrentCategory })" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="page-item disabled">
+                                <span class="page-link" aria-hidden="true">&raquo;</span>
+                            </li>
+                        }
+                    </ul>
+                </nav>
+            </div>
+        </div>
+
+    </div>
+</section>
+<!--====== End Menu Page Section ======-->
+
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Get the sort order, search query, and selected category from the URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const sortOrder = urlParams.get('sortOrder') || 'SortByNewness'; // Default to 'SortByNewness'
+            const searchQuery = urlParams.get('searchQuery') || ''; // Get the current search query if present
+            const currentCategory = urlParams.get('categoryId') || ''; // Get the selected category from the URL
+
+            // Set the selected option based on the sortOrder
+            const selectSortElement = document.getElementById("sortOptions");
+            selectSortElement.value = sortOrder; // Set the value of the dropdown for sorting
+
+            // Update the display text based on the selected option
+            const sortDisplayText = selectSortElement.options[selectSortElement.selectedIndex].getAttribute("data-display");
+            selectSortElement.setAttribute("data-display", sortDisplayText);
+
+            // Set the selected option based on the current category
+            const selectCategoryElement = document.getElementById("categoryOptions");
+            selectCategoryElement.value = currentCategory; // Set the value of the dropdown for categories
+
+            // Update the display text for category (if needed)
+            const categoryDisplayText = selectCategoryElement.options[selectCategoryElement.selectedIndex].getAttribute("data-display");
+            selectCategoryElement.setAttribute("data-display", categoryDisplayText);
+        });
+
+        function sortProducts() {
+            const selectedSortOption = document.getElementById("sortOptions");
+            const selectedValue = selectedSortOption.value;
+
+            // Get the current category
+            const selectedCategory = document.getElementById("categoryOptions").value;
+
+            const displayText = selectedSortOption.options[selectedSortOption.selectedIndex].getAttribute("data-display");
+            selectedSortOption.setAttribute("data-display", displayText);
+
+            const url = '@Url.Action("Index", "Product")';
+            const pageIndex = @Model.PageIndex;
+            const searchQuery = '@ViewBag.CurrentFilter'; // Get the current search query from ViewBag
+
+            // Build the base URL with pageIndex and sortOrder
+            let newUrl = `${url}?pageIndex=${pageIndex}&sortOrder=${selectedValue}`;
+
+            // Include categoryId only if it's not empty
+            if (selectedCategory) {
+                newUrl += `&categoryId=${selectedCategory}`;
+            }
+
+            // Only append searchQuery if it has a value
+            if (searchQuery) {
+                newUrl += `&searchQuery=${searchQuery}`;
+            }
+
+            // Redirect to the newly constructed URL
+            window.location.href = newUrl;
+        }
+
+        function validateSearchInput() {
+            const searchInput = document.getElementById("searchQuery").value.trim();
+            if (searchInput === "") {
+                alert("Please enter a search term.");
+                return false; 
+            }
+            return true; 
+        }
+
+        function filterByCategory() {
+            const selectedCategory = document.getElementById("categoryOptions").value;
+
+            // Get the current sort order
+            const selectedSortOption = document.getElementById("sortOptions").value;
+
+            const url = '@Url.Action("Index", "Product")';
+            const searchQuery = '@ViewBag.CurrentFilter'; // Get the current search query from ViewBag
+
+            // Set pageIndex to 1 when changing the category
+            const pageIndex = 1;
+
+            // Build the base URL with pageIndex and sortOrder
+            let newUrl = `${url}?pageIndex=${pageIndex}&sortOrder=${selectedSortOption}`;
+
+            // Include categoryId only if it's not empty
+            if (selectedCategory) {
+                newUrl += `&categoryId=${selectedCategory}`;
+            }
+
+            // Only append searchQuery if it has a value
+            if (searchQuery) {
+                newUrl += `&searchQuery=${searchQuery}`;
+            }
+
+            // Redirect to the newly constructed URL
+            window.location.href = newUrl;
+        }
+    </script>
+
+}

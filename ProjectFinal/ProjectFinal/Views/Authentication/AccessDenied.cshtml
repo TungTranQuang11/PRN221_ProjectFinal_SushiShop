@@ -1,0 +1,44 @@
+﻿@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@{
+    ViewData["Title"] = "Access Denied";
+}
+
+<!--====== Start Page Section ======-->
+<section class="page-banner">
+    <div class="page-bg-wrapper p-r z-1 bg_cover pt-150 pb-50" style="background-image: url(/assets/images/bg/page-bg.jpg);">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <!--=== Page Banner Content ===-->
+                    <div class="page-banner-content text-center">
+                        <h1 class="page-title">404</h1>
+                        <ul class="breadcrumb-link">
+                            <li><a href="index.html">Home</a></li>
+                            <li class="active">404</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section><!--====== End Page Section ======-->
+<section class="error-section pb-80 pt-50">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="error-wrapper bg_cover pt-130 pb-130" style="background-image: url(/assets/images/bg/error-bg.jpg);">
+                    <div class="error-content text-center text-white">
+                        <span class="number">404</span>
+                        <h1>Oops! Page Not Found</h1>
+                        <p>It looks like you've encountered a "Page Not Found" error, also known as a 404 error. <br> This typically happens when the web server cannot locate</p>
+                        <div class="error-button">
+                            <a href="@Url.Action("Index", "Home")" class="theme-btn style-one">Go To Home</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!--====== Start Footer ======-->

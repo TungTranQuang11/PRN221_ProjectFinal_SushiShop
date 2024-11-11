@@ -1,0 +1,434 @@
+﻿@using System.Text.Json
+@inject IHttpContextAccessor HttpContextAccessor
+@using ProjectFinal.Models
+
+@{
+    var cartCookie = HttpContextAccessor.HttpContext.Request.Cookies["Cart"];
+    var cartItems = new List<CartItem>();
+
+    if (!string.IsNullOrEmpty(cartCookie))
+    {
+        cartItems = JsonSerializer.Deserialize<List<CartItem>>(cartCookie);
+    }
+
+    var totalItems = cartItems.Count();
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - ProjectFinal</title>
+    <!--====== Favicon Icon ======-->
+    <link rel="shortcut icon" href="~/assets/images/favicon.png" type="image/png">
+    <!--====== Google Fonts ======-->
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800&amp;family=Hanken+Grotesk:ital,wght@0,100..900;1,100..900&amp;display=swap" rel="stylesheet">
+    <!--====== FontAwesome css ======-->
+    <link rel="stylesheet" href="~/assets/fonts/fontawesome/css/all.min.css">
+    <!--====== Bootstrap css ======-->
+    <link rel="stylesheet" href="~/assets/vendor/bootstrap/css/bootstrap.min.css">
+    <!--====== Slick-popup css ======-->
+    <link rel="stylesheet" href="~/assets/vendor/slick/slick.css">
+    <!--====== Nice Select css ======-->
+    <link rel="stylesheet" href="~/assets/vendor/nice-select/css/nice-select.css">
+    <!--====== magnific-popup css ======-->
+    <link rel="stylesheet" href="~/assets/vendor/magnific-popup/dist/magnific-popup.css">
+    <!--====== Jquery UI css ======-->
+    <link rel="stylesheet" href="~/assets/vendor/jquery-ui/jquery-ui.min.css">
+    <!--====== Animate css ======-->
+    <link rel="stylesheet" href="~/assets/vendor/animate.css">
+    <!--====== Default css ======-->
+    <link rel="stylesheet" href="~/assets/css/default.css">
+    <!--====== Style css ======-->
+    <link rel="stylesheet" href="~/assets/css/style.css">
+
+    <link rel="stylesheet" href="sweetalert2.min.css">
+
+</head>
+<body>
+    <!--====== Start Loader Area ======-->
+    <div class="fd-preloader">
+        <div class="loader"></div>
+    </div><!--====== End Loader Area ======-->
+    <!--====== Start Overlay ======-->
+    <div class="offcanvas__overlay"></div>
+    <!--====== End Overlay ======-->
+    <!--====== Start Header Area ======-->
+    <header class="header-area header-one navigation-white transparent-header">
+        <div class="container">
+            <div class="header-navigation">
+                <div class="nav-overlay"></div>
+                <div class="primary-menu">
+                    <!--=== Site Branding ===-->
+                    <div class="site-branding">
+                        <a href="@Url.Action("Index", "Home")" class="brand-logo"><img src="~/assets/images/logo/logo-white.png" alt="Logo"></a>
+                    </div>
+                    <div class="nav-inner-menu">
+                        <!--=== Foodix Nav Menu ===-->
+                        <div class="foodix-nav-menu">
+                            <!--=== Mobile Logo ===-->
+                            <div class="mobile-logo mb-30 d-block d-xl-none text-center">
+                                <a href="@Url.Action("Index", "Home")" class="brand-logo"><img src="~/assets/images/logo/logo-main.png" alt="Site Logo"></a>
+                            </div>
+                            <!--=== Main Menu ===-->
+                            <nav class="main-menu">
+                                @if (HttpContextAccessor.HttpContext.Session.GetString("customer") != null)
+                                {
+                                    var customerData = System.Text.Json.JsonSerializer.Deserialize<Customer>(HttpContextAccessor.HttpContext.Session.GetString("customer"));
+                                    if (customerData.Role == 1)
+                                    {
+                                        <ul>
+                                            <li class="menu-item has-children">
+                                                <a href="@Url.Action("ManageProducts", "Admin")">Manage Products</a>
+                                            </li>
+                                            <li class="menu-item has-children">
+                                                <a href="@Url.Action("ManageOrders", "Admin")">Manage Orders</a>
+                                            </li>
+                                            <li class="menu-item has-children">
+                                                <a href="@Url.Action("ManageAccounts", "Admin")">Manage Accounts</a>
+                                            </li>
+                                        </ul>
+                                    }
+                                    else
+                                    {
+                                        <ul>
+                                            <li class="menu-item has-children">
+                                                <a href="@Url.Action("Index", "Home")">Home</a>
+                                            </li>
+                                            <li class="menu-item has-children">
+                                                <a href="@Url.Action("Index", "Product")">Menu</a>
+                                            </li>
+                                            <li class="menu-item has-children">
+                                                <a href="@Url.Action("AboutUs", "Home")">About Us</a>
+                                            </li>
+                                            <li class="menu-item has-children">
+                                                <a href="@Url.Action("OurHistory", "Home")">Our History</a>
+                                            </li>
+                                        </ul>
+                                    }
+
+                                }
+                                else
+                                {
+                                    <ul>
+                                        <li class="menu-item has-children">
+                                            <a href="@Url.Action("Index", "Home")">Home</a>
+                                        </li>
+                                        <li class="menu-item has-children">
+                                            <a href="@Url.Action("Index", "Product")">Menu</a>
+                                        </li>
+                                        <li class="menu-item has-children">
+                                            <a href="@Url.Action("AboutUs", "Home")">About Us</a>
+                                        </li>
+                                        <li class="menu-item has-children">
+                                            <a href="@Url.Action("OurHistory", "Home")">Our History</a>
+                                        </li>
+                                    </ul>
+                                }
+                            </nav>
+
+                            <!--=== Nav Button ===-->
+                            @if (HttpContextAccessor.HttpContext.Session.GetString("customer") != null)
+                            {
+                                var user = JsonSerializer.Deserialize<Customer>(HttpContextAccessor.HttpContext.Session.GetString("customer"));
+                                if (user.Role == 1)
+                                {
+                                    <div class="nav-button mt-50 d-block d-xl-none  text-center">
+                                        <span class="theme-btn style-one">@user.FullName</span>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="nav-button mt-50 d-block d-xl-none  text-center">
+                                        <a href="@Url.Action("Profile", "User")" class="theme-btn style-one">@user.FullName</a>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <div class="nav-button mt-50 d-block d-xl-none  text-center">
+                                    <a href="@Url.Action("SignIn", "Authentication")" class="theme-btn style-one">Sign In</a>
+                                </div>
+
+                            }
+                        </div>
+                        <!--=== Nav Right Item ===-->
+                        <div class="nav-right-item">
+                            @if (HttpContextAccessor.HttpContext.Session.GetString("customer") != null)
+                            {
+                                var user = JsonSerializer.Deserialize<Customer>(HttpContextAccessor.HttpContext.Session.GetString("customer"));
+                                if (user.Role == 1)
+                                {
+                                    <div class="nav-button d-none d-xl-block">
+                                        <span class="theme-btn style-one">@user.FullName</span>
+                                    </div>
+                                    <a href="@Url.Action("Logout", "Authentication")">
+                                        <div class="cart-button">
+                                            <i class="fas fa-sign-out-alt"></i>
+                                        </div>
+                                    </a>
+                                }
+                                else
+                                {
+                                    <div class="nav-button d-none d-xl-block">
+                                        <a href="@Url.Action("Profile", "User")" class="theme-btn style-one">@user.FullName</a>
+                                    </div>
+                                    <a href="@Url.Action("Cart", "Product")">
+                                        <div class="cart-button">
+                                            <i class="far fa-shopping-cart"></i>
+                                            @if (totalItems > 0)
+                                            {
+                                                <span>(@totalItems)</span>
+                                            }
+                                            else
+                                            {
+                                                <span></span>
+                                            }
+                                        </div>
+                                    </a>
+                                }
+                            }
+                            else
+                            {
+                                <div class="nav-button d-none d-xl-block">
+                                    <a href="@Url.Action("SignIn", "Authentication")" class="theme-btn style-one">Sign In</a>
+                                </div>
+                                <a href="@Url.Action("Cart", "Product")">
+                                    <div class="cart-button">
+                                        <i class="far fa-shopping-cart"></i>
+                                        @if (totalItems > 0)
+                                        {
+                                            <span>(@totalItems)</span>
+                                        }
+                                        else
+                                        {
+                                            <span></span>
+                                        }
+                                    </div>
+                                </a>
+                            }
+                            <div class="navbar-toggler">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header><!--====== End Header Area ======-->
+    <div class="container-fluid" style="margin: 0px; padding: 0px">
+        <main role="main">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="footer-default p-r z-1">
+        <div class="footer-shape f-shape_one scene"><span data-depth=".3"><img src="~/assets/images/shape/shape-2.png" alt="shape"></span></div>
+        <div class="footer-shape f-shape_two scene"><span data-depth=".4"><img src="~/assets/images/shape/shape-3.png" alt="shape"></span></div>
+        <div class="footer-shape f-shape_three scene"><span data-depth=".5"><img src="~/assets/images/shape/shape-4.png" alt="shape"></span></div>
+        <div class="footer-shape f-shape_four scene"><span data-depth=".6"><img src="~/assets/images/shape/shape-5.png" alt="shape"></span></div>
+        <div class="footer-shape f-shape_five scene"><span data-depth=".7"><img src="~/assets/images/shape/shape-6.png" alt="shape"></span></div>
+        <div class="footer-shape f-shape_six scene"><span data-depth=".8"><img src="~/assets/images/shape/shape-7.png" alt="shape"></span></div>
+        <div class="footer-shape f-shape_seven scene"><span data-depth=".9"><img src="~/assets/images/shape/shape-8.png" alt="shape"></span></div>
+        <div class="container">
+            <!--=== Footer Widget Area ===-->
+            <div class="footer-widget-area pt-120 pb-75">
+                <div class="row">
+                    <div class="col-lg-3 col-md-6 col-sm-6">
+                        <!--=== Footer Widget ===-->
+                        <div class="footer-widget footer-about-widget mb-40 wow fadeInUp">
+                            <div class="widget-content">
+                                <div class="footer-logo mb-25">
+                                    <a href="index.html"><img src="~/assets/images/logo/logo-white.png" alt="Brand Logo"></a>
+                                </div>
+                                <p>
+                                    Discover culinary delights recipes
+                                    and inspiration in our delightful
+                                    food haven..
+                                </p>
+                                <ul class="social-link">
+                                    <li><a href="https://www.facebook.com/tqtung11" target="_blank" rel="noopener noreferrer"><i class="fab fa-facebook-f"></i></a></li>
+                                    <li><a href="#"><i class="fab fa-twitter"></i></a></li>
+                                    <li><a href="#"><i class="fab fa-instagram"></i></a></li>
+                                    <li><a href="#"><i class="fab fa-youtube"></i></a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 col-sm-6">
+                        <!--=== Footer Widget ===-->
+                        <div class="footer-widget footer-contact-widget mb-40 wow fadeInUp">
+                            <div class="widget-content">
+                                <h4 class="widget-title">Contact Us</h4>
+                                <ul class="address-list">
+                                    <li><a href="https://maps.app.goo.gl/GMhfJcioQyf6trGCA" target="_blank">FPT University</a></li>
+                                    <li><a href="tel:+84 387479017">+84 387 479 017</a></li>
+                                    <li><a href="mailto:tqtung11@gmail.com">tqtung11@gmail.com</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 col-sm-6">
+                        <!--=== Footer Widget ===-->
+                        <div class="footer-widget footer-nav-widget mb-40 wow fadeInUp">
+                            <div class="widget-content">
+                                <h4 class="widget-title">Quick Link</h4>
+                                <ul class="widget-menu">
+                                    <li><a href="@Url.Action("Index", "Home")">Home</a></li>
+                                    <li><a href="@Url.Action("AboutUs", "Home")">About Us</a></li>
+                                    <li><a href="@Url.Action("Index", "Product")">Our Menu</a></li>
+                                    <li><a href="@Url.Action("OurHistory", "Home")">Our History</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 col-sm-6">
+                        <!--=== Footer Widget ===-->
+                        <div class="footer-widget footer-opening-widget mb-40 wow fadeInUp">
+                            <div class="widget-content">
+                                <h4 class="widget-title">Opining time</h4>
+                                <ul class="opening-schedule">
+                                    <li>Monday<span>: 10.00am - 9.00pm </span></li>
+                                    <li>Tuesday<span>: 10.00am - 9.00pm </span></li>
+                                    <li>Wednesday<span>: 10.00am - 9.00pm </span></li>
+                                    <li>Thursday<span>: 10.00am - 9.00pm </span></li>
+                                    <li>Friday<span>: 10.00am - 9.00pm </span></li>
+                                    <li>Saturday<span>: 10.00am - 5.00pm </span></li>
+                                    <li>Sunday<span class="of-close">: Closed</span></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--=== Copyright Area ===-->
+        <div class="copyright-area text-center">
+            <div class="container">
+                <div class="copyright-text">
+                    <p>&copy; 2024 All rights reserved design by TungTQHE176091</p>
+                </div>
+            </div>
+        </div>
+    </footer><!--====== End Footer ======-->
+    <!--====== Back To Top  ======-->
+    <a href="#" class="back-to-top"><i class="far fa-angle-up"></i></a>
+    <!--====== Jquery js ======-->
+    <script src="~/assets/vendor/jquery-3.6.0.min.js"></script>
+    <!--====== Popper js ======-->
+    <script src="~/assets/vendor/popper/popper.min.js"></script>
+    <!--====== Bootstrap js ======-->
+    <script src="~/assets/vendor/bootstrap/js/bootstrap.min.js"></script>
+    <!--====== Slick js ======-->
+    <script src="~/assets/vendor/slick/slick.min.js"></script>
+    <!--====== Magnific js ======-->
+    <script src="~/assets/vendor/magnific-popup/dist/jquery.magnific-popup.min.js"></script>
+    <!--====== Nice-select js ======-->
+    <script src="~/assets/vendor/nice-select/js/jquery.nice-select.min.js"></script>
+    <!--====== Parallax js ======-->
+    <script src="~/assets/vendor/parallax.min.js"></script>
+    <!--====== jquery UI js ======-->
+    <script src="~/assets/vendor/jquery-ui/jquery-ui.min.js"></script>
+    <!--====== WOW js ======-->
+    <script src="~/assets/vendor/wow.min.js"></script>
+    <!--====== Main js ======-->
+    <script src="~/assets/js/theme.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        $(document).ready(function () {
+            $(".add-to-cart").click(function (e) {
+                e.preventDefault();
+                var productId = $(this).data("productid");
+                var quantity = $(this).closest(".menu-info-content").find(".quantity").val();
+
+                console.log("Quantity: ", quantity);
+
+                quantity = parseInt(quantity) || 1;
+
+                $.ajax({
+                    url: '@Url.Action("AddToCart", "Product")',
+                    type: 'POST',
+                    data: { productId: productId, quantity: quantity },
+                    success: function (response) {
+                        if (response.success) {
+                            Swal.fire({
+                                icon: "success",
+                                title: "Added To Cart",
+                                showConfirmButton: false,
+                                timer: 1500
+                            });
+                            $(".cart-button span").text("(" + response.totalItems + ")");
+                        } else {
+                            alert("Error: " + response.message);
+                        }
+                    },
+                    error: function () {
+                        alert("Failed to add product to cart.");
+                    }
+                });
+            });
+
+            $(document).on('click', '.remove-cart', function (e) {
+                e.preventDefault(); 
+
+                var productId = $(this).data("productid"); 
+                var $cartRow = $(this).closest('tr');
+
+                Swal.fire({
+                    title: "Are you sure?",
+                    text: "You won't be able to revert this!",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#3085d6",
+                    cancelButtonColor: "#d33",
+                    confirmButtonText: "Yes, delete it!"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '@Url.Action("RemoveFromCart", "Product")',
+                            type: 'POST',
+                            data: { productId: productId }, 
+                            success: function (response) {
+                                if (response.success) {
+                                    $cartRow.remove(); 
+                                    $(".cart-button span").text("(" + response.totalItems + ")");
+
+                                    $(".shopping-cart-total .total.price span").text("$" + response.subtotal);
+
+                                    if (response.totalItems === 0) {
+                                        $("tbody").html('<tr><td colspan="5" class="text-center cart-empty" style="font-size: 30px; font-weight: bold">Your Cart is Empty.</td></tr>');
+                                        $(".clear-cart").hide(); 
+                                    }
+
+                                    Swal.fire({
+                                        title: "Deleted!",
+                                        text: "Your item has been removed from the cart.",
+                                        icon: "success"
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        title: "Error!",
+                                        text: response.message,
+                                        icon: "error"
+                                    });
+                                }
+                            },
+                            error: function () {
+                                Swal.fire({
+                                    title: "Failed!",
+                                    text: "Failed to remove product from cart.",
+                                    icon: "error"
+                                });
+                            }
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

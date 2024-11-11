@@ -1,0 +1,63 @@
+﻿@{
+    ViewData["Title"] = "Sign In";
+}
+
+<!--====== Start Page Section ======-->
+<section class="page-banner">
+    <div class="page-bg-wrapper p-r z-1 bg_cover pt-120 pb-110" style="background-image: url(/assets/images/bg/page-bg.jpg);">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <!--=== Page Banner Content ===-->
+                    <div class="page-banner-content text-center">
+                        <h1 class="page-title">Sign In</h1>
+                        <ul class="breadcrumb-link">
+                            <li><a href="@Url.Action("Index", "Home")">Home</a></li>
+                            <li class="active">Sign In</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!--====== End Page Section ======-->
+<!--====== Start Checkout Section ======-->
+<section class="checkout-section pt-80 pb-80">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="checkout-faqs wow fadeInUp" id="checkout-faq">
+                    <div class="alert gray-bg">
+                        <form method="post" action="@Url.Action("SignIn", "Authentication")">
+                            <p>Please login your accont.</p>
+                            @if (ViewBag.Error != null)
+                            {
+                                <p style="color: red">@ViewBag.Error</p>
+                            }
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <input type="email" id="email-address" name="email" class="form_control" value="@ViewBag.Email" placeholder="Your Email Address" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <input type="password" id="password" name="password" class="form_control" value="" placeholder="Your Password" maxlength="50" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-footer d-flex align-items-center">
+                                <button type="submit" class="theme-btn style-one">Sign In</button>
+                                <div>
+                                    <span>Don't have an account? </span><a href="@Url.Action("SignUp", "Authentication")" style="margin-left: 5px; font-weight: bold; color: var(--primary-color)">Sign Up</a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!--====== End Checkout Section ======-->

@@ -1,0 +1,84 @@
+﻿@{
+    ViewData["Title"] = "Sign Up";
+}
+
+<!--====== Start Page Section ======-->
+<section class="page-banner">
+    <div class="page-bg-wrapper p-r z-1 bg_cover pt-120 pb-110" style="background-image: url(/assets/images/bg/page-bg.jpg);">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <!--=== Page Banner Content ===-->
+                    <div class="page-banner-content text-center">
+                        <h1 class="page-title">Sign Up</h1>
+                        <ul class="breadcrumb-link">
+                            <li><a href="@Url.Action("Index", "Home")">Home</a></li>
+                            <li class="active">Sign Up</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section><!--====== End Page Section ======-->
+<!--====== Start Sign Up Section ======-->
+<section class="checkout-section pt-80 pb-80">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="checkout-faqs wow fadeInUp" id="checkout-faq">
+                    <div class="alert gray-bg">
+                        <form method="post" action="@Url.Action("SignUp", "Authentication")" onsubmit="return validateForm()">
+                            <p>Create your account</p>
+                            @if (ViewBag.Error != null)
+                            {
+                                <p style="color: red">@ViewBag.Error</p>
+                            }
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <input type="text" id="full-name" name="fullname" class="form_control" placeholder="Full Name" required value="@ViewBag.FullName">
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <input type="email" id="email" name="email" class="form_control" placeholder="Your Email Address" required value="@ViewBag.Email">
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <input type="password" id="password" name="password" class="form_control" placeholder="Create a Password" maxlength="50" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <input type="password" id="confirm-password" name="confirmPassword" class="form_control" placeholder="Confirm Password" maxlength="50" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-footer d-flex align-items-center">
+                                <button type="submit" class="theme-btn style-one">Sign Up</button>
+                                <div style="margin-left: 15px;">
+                                    <span>Already have an account? </span><a href="@Url.Action("SignIn", "Authentication")" style="margin-left: 5px; font-weight: bold; color: var(--primary-color)">Sign In</a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!--====== End Sign Up Section ======-->
+<!-- JavaScript for Password Confirmation Validation -->
+<script>
+    function validateForm() {
+        const password = document.getElementById("password").value;
+        const confirmPassword = document.getElementById("confirm-password").value;
+        if (password !== confirmPassword) {
+            alert("Passwords do not match. Please try again.");
+            return false; 
+        }
+        return true; 
+    }
+</script>

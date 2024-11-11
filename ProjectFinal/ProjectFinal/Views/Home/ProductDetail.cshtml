@@ -1,0 +1,189 @@
+﻿@model ProjectFinal.Models.Product
+
+@{
+    ViewData["Title"] = "Product Detail";
+}
+
+<!--====== Start Page Section ======-->
+<section class="page-banner">
+    <div class="page-bg-wrapper p-r z-1 bg_cover pt-150 pb-110" style="background-image: url(/assets/images/bg/page-bg.jpg);">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <!--=== Page Banner Content ===-->
+                    <div class="page-banner-content text-center">
+                        <h1 class="page-title">Menu Details</h1>
+                        <ul class="breadcrumb-link">
+                            <li><a href="@Url.Action("Index", "Home")">Home</a></li>
+                            <li class="active">Menu Details</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section><!--====== End Page Section ======-->
+<!--====== Start Menu Section ======-->
+<section class="menu-details-section pt-130 pb-65">
+    <div class="container">
+        <!--=== Menu Details Wrapper ===-->
+        <div class="menu-details-wrapper">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <!--=== Menu Image ===-->
+                    <div class="menu-image mb-50 wow fadeInLeft">
+                        <img src="/assets/images/product/@Model.Image" alt="Product Image">
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <!--=== Menu Info ===-->
+                    <div class="menu-info-content mb-50 wow fadeInRight">
+                        <h4 class="title">@Model.ProductName</h4>
+                        <p>@Model.Description</p>
+                        <span class="price"><span class="currency">$</span>@Model.Price</span>
+                        <div class="product-cart-variation">
+                            <ul>
+                                <li>
+                                    <div class="quantity-input">
+                                        <button class="up-quantity"><i class="far fa-minus"></i></button>
+                                        <input class="quantity" type="text" value="1" name="quantity" max="@Model.QuantityInStock" readonly>
+                                        <button class="down-quantity"><i class="far fa-plus"></i></button>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                        @if (Model.QuantityInStock > 0)
+                        {
+                            <div class="add-to-cart" data-productid="@Model.ProductId">
+                                <button class="theme-btn style-one">Add To Cart</button>
+                            </div>
+                        } 
+                        else
+                        {
+                            <div>
+                                <button class="theme-btn style-one">Temporarily Unavailable</button>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xl-6">
+                    <div class="foodix-banner-wrapper">
+                        <!--=== Foodix Banner ===-->
+                        <div class="foodix-banner-item style-three mb-30 wow fadeInUp">
+                            <div class="banner-inner-wrap bg_cover" style="background-image: url(/assets/images/bg/banner-bg-3.jpg);">
+                                <div class="banner-img"><img src="/assets/images/bg/bn-img-1.png" alt="banner image"></div>
+                                <div class="banner-content">
+                                    <span>Premium skewers</span>
+                                    <h3>chicken skewers</h3>
+                                    <p>Savor the tantalizing taste of our expertly grilled chicken skewers, marinated.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-6">
+                    <div class="foodix-banner-wrapper">
+                        <!--=== Foodix Banner ===-->
+                        <div class="foodix-banner-item style-three mb-30 wow fadeInUp">
+                            <div class="banner-inner-wrap bg_cover" style="background-image: url(/assets/images/bg/banner-bg-4.jpg);">
+                                <div class="banner-img"><img src="/assets/images/bg/bn-img-2.png" alt="banner image"></div>
+                                <div class="banner-content">
+                                    <span>Premium Wrap</span>
+                                    <h3>chicken Wrap</h3>
+                                    <p>Indulge in our savory chicken wrap, a delightful blend of tender grilled chicken.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--=== Related Items ===-->
+            <div class="releted-item-wrap pt-45">
+                <h3 class="releted-title mb-30 wow fadeInDown">Related Items</h3>
+                <div class="row justify-content-center">
+                    @foreach (var product in ViewBag.RandomRelatedProducts)
+                    {
+                        <div class="col-xl-4 col-md-6 col-sm-12">
+                            <div class="menu-item style-one mb-40">
+                                <div class="menu-thumbnail">
+                                    <img src="/assets/images/menu/@product.Image" alt="Menu Image">
+                                </div>
+                                <div class="menu-info">
+                                    <h4><a href="@Url.Action("ProductDetail", "Home", new { id = product.ProductId })">@product.ProductName</a></h4>
+                                    <p>@product.Description</p>
+                                    <p class="price">$@product.Price</p>
+                                    <a href="#" class="theme-btn style-two add-to-cart" data-productid="@product.ProductId">Add To Cart</a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</section><!--====== End Menu Section ======-->
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        // Function to update the state of the quantity input and buttons
+        function updateButtonState() {
+            var quantityInput = $('.quantity');
+            var quantity = parseInt(quantityInput.val());
+            var max = parseInt(quantityInput.attr('max'));
+
+            // Disable the down button if quantity is 1
+            $('.up-quantity').prop('disabled', quantity <= 1);
+
+            // Disable the up button if quantity is at max
+            $('.down-quantity').prop('disabled', quantity >= max);
+        }
+
+        // Event handler for quantity input change
+        $('.quantity').on('input', function () {
+            var max = parseInt($(this).attr('max'));
+            var value = parseInt($(this).val());
+
+            // Validate the input value
+            if (isNaN(value) || value < 1) {
+                $(this).val(1); // Reset to 1 if invalid
+            } else if (value > max) {
+                $(this).val(max); // Reset to max if exceeds
+            }
+
+            updateButtonState();
+        });
+
+        // Event handler for the quantity down button
+        $('.up-quantity').click(function () {
+            var quantityInput = $('.quantity');
+            var quantity = parseInt(quantityInput.val());
+
+            // Decrease the quantity by 1 if greater than 1
+            if (quantity > 1) {
+                quantityInput.val(quantity - 1);
+                updateButtonState();
+            }
+        });
+
+        // Event handler for the quantity up button
+        $('.down-quantity').click(function () {
+            var quantityInput = $('.quantity');
+            var quantity = parseInt(quantityInput.val());
+            var max = parseInt(quantityInput.attr('max'));
+
+            // Increase the quantity by 1 if less than max
+            if (quantity < max) {
+                quantityInput.val(quantity + 1);
+                updateButtonState();
+            }
+        });
+
+        // Initial state check
+        updateButtonState();
+    });
+
+
+</script>
